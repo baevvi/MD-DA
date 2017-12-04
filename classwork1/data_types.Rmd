@@ -1,0 +1,49 @@
+---
+keep_md: yes
+author: "Бабикова Евгения"
+date: "16 10 2017"
+output:
+  html_document: default
+  keep_md: yes
+  md_document: default
+title: "data_types"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+1. Присвоить значение 33.3 переменной my_numeric.
+```{r, echo=FALSE}
+cat("my_numeric = ", my_numeric<-33.3)
+```
+2. Проверить тип данных переменной.
+```{r,echo=FALSE}
+cat(class(my_numeric))
+```
+3. Сменить значение my_numeric на 42.
+```{r, echo=FALSE}
+my_numeric = 42
+cat("my_numeric = ", my_numeric)
+```
+4. Проверить тип данных my_numeric.
+```{r,echo=FALSE}
+cat(class(my_numeric))
+```
+5. Установить значение my_character в "МИР".
+```{r,echo=FALSE}
+my_character <- "МИР"
+cat("my_character = ", my_character)
+```
+6. Проверить тип данных my_character.
+```{r,echo=FALSE}
+cat(class(my_character))
+```
+7. Установить my_logical в FALSE.
+```{r,echo=FALSE}
+my_logical <- TRUE
+cat("my_logical = ", my_logical)
+```
+8. Проверьте тип данных my_logical.
+```{r,echo=FALSE}
+cat(class(my_logical))
+```

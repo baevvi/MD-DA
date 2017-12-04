@@ -1,0 +1,117 @@
+---
+title: "Лабораторная работа №2"
+author: "Бабикова Евгения"
+date: "06 11 2017"
+output:
+  html_document: default
+  keep_md: yes
+  md_document: default
+keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Задание 1
+Среда R включает в себя набор заранее сконфигурированных массивов данных. В данной лабораторной требуется использовать одну из них — датафрейм из 93 машин-новинок 1993 года. 
+На полном наборе данных была выполнена команда ```summary()```.
+```{r, echo=FALSE}
+library(MASS)
+data(Cars93)
+summary(Cars93)
+cat("Количество строк в файле Cars93:", nrow(Cars93))
+```
+По ``summary()`` можно сказать, сколько строк содержится в датафрейме, сложив количество объектов в определенной категории. Например, по происхождению машины делятся на американские (48 шт.) и не американские (45 шт.), что в сумме дает 93 объекта.
+Средняя цена машин с задним приводом составляет:
+```{r, echo=FALSE}
+cat(mean(Cars93$Price[Cars93$DriveTrain=="Rear"]))
+```
+Минимальное число лошадиных сил автомобиля для 7 пассажиров:
+```{r, echo=FALSE}
+cat(min(Cars93$Horsepower[Cars93$Passengers=="7"]))
+```
+А для 6 пассажиров:
+```{r, echo=FALSE}
+cat(min(Cars93$Horsepower[Cars93$Passengers=="6"]))
+```
+Для нахождения машин с с максимальным, минимальным и средним (медианой) расстоянием, которая машина может проехать по трассе, нужно использовать колонки _MPG.hightway_ (миль на галлон по трассе) и _Fuel.tank.capacity_ (вместимость бака). Результат указан в милях.
+```{r, echo=FALSE}
+cat("Минимальное расстояние: ", min(Cars93$MPG.highway*Cars93$Fuel.tank.capacity),
+    "\nСреднее расстояние:", mean(Cars93$MPG.highway*Cars93$Fuel.tank.capacity),
+    "\nМаксимальное расстояние: ", max(Cars93$MPG.highway*Cars93$Fuel.tank.capacity))
+```
+# Задание 2
+Фабрика производства автомобилей. Код старается оптимизировать выпуск продукции ориентируясь на доступные ресурсы.
+```{r, include=FALSE}
+factory.run <- function (o.cars=1, o.trucks=1) {
+  factory <- matrix(c(40,1,60,3),nrow=2, dimnames=list(c("трудодни","сталь"),c("автомобили","грузовики")))
+  warehouse <- c(1600,70) #Доступно материалов на складе
+  names(warehouse) <- rownames(factory)
+  reserve <- c(8,1)
+  names(reserve) <- rownames(factory)
+  output <- c(o.cars, o.trucks)
+  names(output) <- colnames(factory)
+  
+  steps <- 0 # Счётчик числа шагов цикла
+  repeat {
+    steps <- steps + 1
+    needed <- factory %*% output # Подсчитаем ресурсы, которые нам нужны для производства требуемого кол-ва машин
+    message(steps)
+    print(needed)
+    # Если ресурсов достаточно и остаток меньше или равен резерву, то мы произвели максимум возможного.
+    # Нужно прекращать
+    if (all(needed <= warehouse) && all((warehouse - needed) <= reserve)) {
+      break()
+    }
+    # Если заявка слишком большая и ресурсов недостаточно, уменьшим её на 10%
+    if (all(needed > warehouse)) {
+      output <- output * 0.9
+      next()
+    }
+    # Если всё наоброт, то увеличим на 10%
+    if (all(needed < warehouse)) {
+      output <- output * 1.1
+      next()
+    }
+    # Если мы потребили одного ресурса слишком много, а другого недостаточно,
+    # то увеличим план на случайную величину
+    output <- output * (1+runif(length(output),min=-0.1,max=0.1))
+  }
+  output <- append(output, c(steps,needed))
+  names(output) <- append(colnames(factory), c("шаги","трудодни","сталь"))
+  return(output)
+}
+```
+```{r, include=FALSE}
+result.default<-factory.run()
+```
+Функция вызвана с входными значениями _o.cars=1, o.trucks=1_. Она возвращает число шагов _steps_, произведенное число машин _o.cars, o.trucks_, а также затраченные ресурсы _needed_ (трудодни и сталь), с помощью команды ``append()``.
+```{r, echo=FALSE}
+result.default
+```
+Вызовем функцию ``factory.run()`` четыре раза. Результаты вызывов функции похожи, так как входные значения одинаковые. 
+```{r, include=FALSE}
+result.default.1<-factory.run()
+result.default.2<-factory.run()
+result.default.3<-factory.run()
+result.default.4<-factory.run()
+```
+```{r, echo=FALSE, collapse=TRUE}
+cat("Результат первого запуска:\n")
+result.default.1
+cat("\nРезультат второго запуска:\n") 
+result.default.2
+cat("\nРезультат третьего запуска:\n")
+result.default.3
+cat("\nРезультат четвертого запуска:\n")
+result.default.4
+```
+Установим план, равный 30 автомобилей и 20 грузовиков.
+```{r, include=FALSE}
+result.plan<-factory.run(30,20)
+```
+```{r, echo=FALSE}
+result.plan
+```
+

@@ -1,0 +1,40 @@
+---
+title: "data_types_conversion"
+author: "Бабикова Евгения"
+date: "16 10 2017"
+output:
+  md_document: default
+  keep_md: yes
+  html_document: default
+keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+ Проверка и преобразование типов is.XYS as.XYZ 
+
+1. Присвоить значение 33.3 переменной my_numeric.
+```{r, echo=FALSE}
+my_numeric <- 33.3
+cat("my_numeric = ", my_numeric)
+```
+2. Установить значение my_character в "33".
+```{r, echo=FALSE}
+my_character <- "33"
+cat("my_character = ", my_character)
+```
+3. Проверить тип данных my_character: является ли числом?
+```{r, echo=FALSE}
+cat(is.numeric(my_character))
+```
+4. Преобразовать my_character в число.
+```{r, echo=FALSE}
+my_numeric_character<-as.numeric(my_character)
+cat("my_numeric_character = ", my_numeric_character)
+```
+5. Найти сумму my_numeric и my_numeric_character.
+```{r, echo=FALSE}
+cat(my_numeric+my_numeric_character)
+```

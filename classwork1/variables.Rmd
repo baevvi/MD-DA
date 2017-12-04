@@ -1,0 +1,38 @@
+---
+title: "variables"
+author: "Бабикова Евгения"
+date: "16 10 2017"
+output:
+  md_document: default
+  keep_md: yes
+  html_document: default
+keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+1. Присвоить значение 66 переменной x.
+```{r, echo=FALSE}
+x <- 66
+```
+2. Вывести на экран значение x.
+```{r,echo=FALSE}
+cat("x = ", x)
+```
+3. Присвоить значение 33 переменной y.
+```{r, echo=FALSE}
+y <- 33
+```
+4. Вывести на экран значение y.
+```{r,echo=FALSE}
+cat("y = ", y)
+```
+5. Вывести на экран сумму x и y.
+```{r,echo=FALSE}
+cat("x + y = ", x+y)
+```
+6. Сохранить сумму в переменную z.
+```{r,echo=FALSE}
+z=x+y
+```

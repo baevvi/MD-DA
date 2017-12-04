@@ -1,0 +1,31 @@
+---
+keep_md: yes
+author: "Бабикова Евгения"
+date: "16 10 2017"
+output:
+  html_document: default
+  keep_md: yes
+  md_document: default
+title: "vector_names"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,echo=FALSE}
+cat("Домашние матчи Урала: ", ural_home <- c(2, 0, 1, 0), 
+    "\nВыездные матчи Урала: ", ural_away <- c(0, 0, 1, 1))
+```
+```{r,echo=FALSE}
+cat("Имена команд-хозяев: ", names(ural_home) <- c("Ufa", "CSKA", "Arsenal", "Anzhi"),
+    "\nИмена команд-гостей: ", names(ural_away) <- c("Rostov", "Amkar", "Rubin", "Orenburg"))
+```
+```{r,echo=FALSE}
+cat("Общее количество голов домашних матчей -", sum(ural_home), " и выездных матчей -", sum(ural_away),
+    "\nСреднее количество голов домашних матчей -", mean(ural_home), " и выездных матчей -", mean(ural_away))
+```
+```{r,echo=FALSE}
+cat("В домашних матчах команда забила на", sum(ural_home)-sum(ural_away), "мяч больше",
+    "\nСреднее количество голов в домашних матчах больше на", mean(ural_home)-mean(ural_away))
+```

@@ -1,0 +1,32 @@
+---
+title: "vectors"
+author: "Бабикова Евгения"
+date: "17 10 2017"
+output:
+  md_document: default
+  keep_md: yes
+  html_document: default
+keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,echo=FALSE}
+cat("Числовой вектор num_vector:  ", num_vector <- c(1, 10, 49), 
+    "\nCтроковый вектор char_vector:", char_vector <- c("a", "b", "c"),
+    "\nБулевый вектор bool_vector:  ", bool_vector <-c(TRUE, FALSE, TRUE))
+```
+```{r,echo=FALSE}
+cat("Значения из числового вектора при помощи булевого: ", num_vector[bool_vector],
+    "\nЗначения из строкового вектора при помощи булевого:", char_vector[bool_vector])
+```
+```{r,echo=FALSE}
+cat("Булевый вектор из числового, где элементы больше 10, x: ", x<-num_vector>10,
+    "\nДанные, выбранные из числового вектора при помощи вектора x:", num_vector[x],
+    "\n\nБулевый вектор из числового, где элементы больше 10: ", num_vector>10,
+    "\nДанные, выбранные из числового вектора:", num_vector[num_vector>10],
+    "\n\nБулевый вектор из строкового, где элементы равны b, y: ", y<-char_vector=="b",
+    "\nДанные, выбранные из строкового вектора при помощи вектора y:", char_vector[y])
+```
