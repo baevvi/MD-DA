@@ -1,0 +1,64 @@
+---
+keep_md: yes
+author: "Бабикова Евгения"
+date: "04 12 2017"
+output:
+  html_document: default
+  keep_md: yes
+  md_document: default
+title: "Классная работа №4"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, echo=FALSE, collapse=TRUE}
+gmp <- read.table(file="https://raw.githubusercontent.com/SergeyMirvoda/MD-DA-2017/master/data/gmp.dat")
+```
+```{r, include=FALSE}
+gmp$pop <- gmp$gmp / gmp$pcgmp
+estimate.scaling.exponent <- function(a, y0=6611, response=gmp$pcgmp,
+  predictor = gmp$pop, maximum.iterations=100, deriv.step = 1/100,
+  step.scale = 1e-12, stopping.deriv = 1/100) {
+  
+  mse <- function(a) { mean((response - y0*predictor^a)^2) }
+  for (iteration in 1:maximum.iterations) {
+    deriv <- (mse(a+deriv.step) - mse(a))/deriv.step
+    a <- a - step.scale*deriv
+    if (abs(deriv) <= stopping.deriv) { break() }
+  }
+  fit <- list(a=a,y0=y0,iterations=iteration,
+              converged=(iteration < maximum.iterations))
+  return(fit)
+}
+```
+Функция вызвана с начальным значением a0 = 0.15.
+```{r, echo=FALSE,collapse=TRUE}
+f0<-estimate.scaling.exponent(0.15)
+cat("Результат работы функции:\n")
+f0
+```
+Получен коэффициент y0. С его помощью построена кривая:
+```{r, echo=FALSE}
+plot(gmp$pop, gmp$pcgmp, log="x", xlab="Население", ylab="Экономический рост на душу населения", main="Площади городов, 2006 г.")
+curve(6611*x^(f0$a),add=TRUE,col="red")
+```
+
+Из набора исходных данных случайно удалена одна из точек, выбранная с помощью равномерного распределения.В результате чего
+```{r, echo=FALSE}
+random.index<-round(runif(1, 1,nrow(gmp)))
+gmp <- gmp[-random.index,]
+cat("коэффициент a изменился на", estimate.scaling.exponent(0.15)$a - f0$a)
+```
+Запустим оценку несколько раз с разных точек. Увеличение стартового параметра ведет к уменьшению a:
+```{r, echo=FALSE}
+f1<-estimate.scaling.exponent(0)
+cat("значение a1 при 0:", f1$a)
+f2<-estimate.scaling.exponent(0.3)
+cat("значение a2 при 0.3:", f2$a)
+f3<-estimate.scaling.exponent(0.35)
+cat("значение a3 при 0.35:", f3$a)
+f4<-estimate.scaling.exponent(0.4)
+cat("значение a4 при 0.4:", f4$a)
+```
