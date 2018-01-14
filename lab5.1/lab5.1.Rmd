@@ -1,0 +1,222 @@
+---
+keep_md: yes
+author: "Бабикова Евгения"
+date: "10 12 2017"
+output:
+  html_document: default
+  keep_md: yes
+  md_document: default
+title: "Лабораторная работа №5.1"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Дисперсионный анализ
+
+##Работа с исходными данными
+Исходные данные имеют следующий вид:
+```{r, echo=FALSE}
+data = read.csv("/Users/Evgenia/Documents/ УрФУ/Четвертый курс/Методы доступа к многомерным данным/lab5.1/diet.csv",row.names=1)
+summary(data)
+```
+После переименования колнок и добавление новой колонки weight.loss, данные выглядят так:
+```{r, echo=FALSE}
+colnames(data) <- c("gender", "age", "height", "initial.weight", 
+                    "diet.type", "final.weight")
+data$diet.type <- factor(c("A", "B", "C")[data$diet.type])
+data$weight.loss = data$initial.weight - data$final.weight
+summary(data)
+```
+##Анализ исходных данных
+Диаграммы размаха по типам диет:
+
+```{r, echo=FALSE}
+boxplot(weight.loss~diet.type,data=data,col="light gray",
+        ylab = "Weight loss (kg)", xlab = "Diet type")
+abline(h=0,col="green")
+```
+
+По диаграммам размаха видно, что по типам диет есть различия. Например, при диете С наблюдается наибольшая потеря килограм, а при диете B - даже набор веса, а две точки над "ящиком" диеты А, выбивающиеся из общей картины, могут являться выбросами.
+
+Данные по типам диет не являются сбалансированными, так как в диете А число наблюдений другое, чем в В и С:
+```{r, echo=FALSE}
+balanced<-table(data$diet.type)
+balanced
+```
+Размер выборки больше, чем десятикратное количество групп.
+
+Групповые средние для типов диет:
+```{r, echo=FALSE,include=FALSE}
+library(gplots) 
+plotmeans(weight.loss ~ diet.type, data=data)
+```
+```{r, echo=FALSE}
+plotmeans(weight.loss ~ diet.type, data=data)
+```
+
+Суммарная статистика по типам диет относительно стандартного отклонения:
+```{r, echo=FALSE}
+aggregate(data$weight.loss, by = list(data$diet.type), FUN=sd)
+```
+Стандартное отклонение для всех групп примерно одинаковое. По эффективности побеждает диета C, а уступает другим - B.
+
+Подгонка дисперсионного анализа с помощью функции ``aov()` ` - частный случай линейной модели lm.
+```{r, echo=FALSE}
+fit <- aov(weight.loss ~ diet.type, data=data)
+summary(fit)
+```
+Результат F-теста свидетельствует, что разные по типу диеты неодинаково эффективны, однако отсюда нельзя понять, какие именно диеты различаются между собой.
+
+Для ответа на этот вопрос используются множественные сравнения.
+Попарные различия между средними значениями для всех групп реализованы с помощью функции ``TukeyHSD()``:
+```{r, echo=FALSE}
+TukeyHSD(fit)
+```
+Из полученных результатов видно, что между типами диет А и В нет статистической разницы, когда между C и B она более значительна.
+
+Визуализация межгрупповых различий:
+```{r, echo=FALSE,include=FALSE}
+library(multcomp)
+par(mar=c(5,4,6,2))
+tuk <- glht(fit, linfct=mcp(diet.type="Tukey"))
+```
+```{r, echo=FALSE}
+plot(cld(tuk, level=.05),col="lightgrey")
+```
+
+Видно, что диеты А и B статистически не отличаются (обозначены одинаковыми буквами), а С - сильно отличается от предыдущих двух.
+
+##Избавление от выбросов
+Выбросами можно считать набор веса при соблюдении диеты, а также два значения, выбивающиеся из диаграммы размаха для диеты типа A. 
+```{r, echo=FALSE}
+data.noout <- data[data$weight.loss > 0 &data$weight.loss < 8,]
+```
+
+Диаграммы размаха для данных без выбросов:
+```{r, echo=FALSE}
+boxplot(weight.loss~diet.type,data=data.noout,col="light gray",
+        ylab = "Weight loss (kg)", xlab = "Diet type")
+```
+
+Данные по типам диет не являются сбалансированными, так как количества наблюдений везде разлчные.
+```{r, echo=FALSE}
+balanced.noout<-table(data.noout$diet.type)
+balanced.noout
+```
+Размер выборки больше, чем десятикратное количество групп.
+
+Групповые средние и доверительные интервалы для типов диет:
+```{r, echo=FALSE,include=FALSE}
+library(gplots) 
+plotmeans(weight.loss ~ diet.type, data=data.noout)
+```
+```{r, echo=FALSE}
+plotmeans(weight.loss ~ diet.type, data=data.noout)
+```
+
+Суммарная статистика по типам диет относительно стандартного отклонения:
+```{r, echo=FALSE}
+aggregate(data.noout$weight.loss, by = list(data.noout$diet.type), FUN=sd)
+```
+Стандартное отклонение для групп примерно одно. Максимальное для диеты типа С и минимальное - для А. По эффективности побеждает диета С, а уступает другим - А.
+
+Подгонка дисперсионного анализа:
+```{r, echo=FALSE}
+fit.noout <- aov(weight.loss ~ diet.type, data=data.noout)
+summary(fit.noout)
+```
+Результат F-теста свидетельствует, что разные по типу диеты неодинаково эффективны.
+
+Множественное сравнение:
+```{r, echo=FALSE}
+TukeyHSD(fit.noout)
+```
+Из полученных результатов видно, что между типами диет А и В практически нет статистической разницы, как и между С и В, а вот между С и А она более значительна.
+
+Визуализация межгрупповых различий:
+```{r, echo=FALSE,include=FALSE}
+library(multcomp)
+par(mar=c(5,4,6,2))
+tuk.noout <- glht(fit.noout, linfct=mcp(diet.type="Tukey"))
+```
+```{r, echo=FALSE}
+plot(cld(tuk.noout, level=.05),col="lightgrey")
+```
+
+Видно, что диеты А и B статистически не отличаются (обозначены одинаковыми буквами), так же как B и C, а А и С различны.
+
+Таким образом, при удалении выбросов, оказалось, что статисически диеты А и B, В и С дают одинаковые результаты. Однако, при сравнении диет А и С очевидно их сильное отличие.
+До устранения выбросов, наиболее эффективной была диета С, а наименее - В. Теперь же самой худшей диетой является А. 
+
+##Задания из файла
+
+###Есть ли зависимость потери веса и пола?
+Для изучения зависимости потерянных кг и пола, построены диаграмы размаха:
+```{r, echo=FALSE}
+data.noout$gender <- factor(c("Female", "Male")[as.ordered(data.noout$gender)])
+boxplot(weight.loss ~ gender, data = data.noout, col = "light gray",
+        ylab = "Weight loss (kg)", xlab = "Gender")
+```
+
+Мужчины в среднем теряют больше массы, однако разброс значений у женщин сильнее.
+Данные не являются сбалансированными, так как количества наблюдений разные:
+```{r, echo=FALSE}
+balanced<-table(data$diet.type)
+balanced
+```
+Размер выборки больше, чем десятикратное количество групп.
+
+Групповые средние:
+
+```{r, echo=FALSE}
+plotmeans(weight.loss ~ gender, data = data.noout)
+```
+
+Суммарная статистика относительно стандартного отклонения:
+```{r, echo=FALSE}
+aggregate(data.noout$weight.loss, by = list(data.noout$gender), FUN = sd)
+```
+Стандартное отклонение для всех групп примерно одинаковое. 
+Суммарная статистика относительно среднего значения:
+```{r,echo=FALSE}
+aggregate(data.noout$weight.loss, by = list(data.noout$gender), FUN = mean)
+```
+Женщинам несколько проще сбрасывать вес, чем мужчинам.
+
+Подгонка дисперсионного анализа:
+```{r, echo=FALSE}
+fit.noout.gender <- aov(weight.loss ~ gender, data=data.noout)
+summary(fit.noout.gender)
+```
+Результат F-теста статистически незначим. Пол и потерянные кг никак не связаны.
+
+
+###Эффект от диеты и пол
+
+```{r, echo=FALSE}
+data.noout$typebygender <- interaction(data.noout$diet.type, data.noout$gender)
+fit.noout.typebygender <- aov(weight.loss ~ typebygender, data = data.noout)
+summary(fit.noout.typebygender)
+```
+Результат F-теста статистически значим. Пол и эффект диеты связаны.
+
+Множественное сравнение:
+```{r, echo=FALSE}
+TukeyHSD(fit.noout.typebygender)
+tuk.typebygender <- glht(fit.noout.typebygender, linfct = mcp(typebygender = "Tukey"))
+plot(cld(tuk.typebygender, level = .05), col = "lightgrey")
+```
+
+Построение диаграмм размаха упрощает анализ.
+Согласно статистике эффект от диеты В для мужчин и диеты С для женщин не отличается (обозначено буквой a). 
+Эффект от сочетаний диета А, В для женщин и А, С для мужчин один (b).
+
+###Связан ли рост с эффективностью диеты от пола?
+Подгонка дисперсионного анализа:
+```{r, echo=FALSE}
+
+fit.height <- aov(weight.loss ~ typebygender * height, data = data.noout)
+summary(fit.height)
+```
+Согласно F-тесту параметры не связаны.
